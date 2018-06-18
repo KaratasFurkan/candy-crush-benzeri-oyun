@@ -23,7 +23,7 @@ int will_continue(char **matrix, int row, int column);
 void main(){
     int i, j, row, column, change, *score = (int *) malloc(sizeof(int)); *score = 0;
     char **matrix;
-    srand(time(NULL));
+    srand(time(NULL));  //system("COLOR FC"); 
     printf("Oyun alaninin satir ve sutun sayisini veriniz:  "); scanf("%d %d", &row, &column); getchar();
     matrix = (char **) malloc(row * sizeof(char *));         ///
     for(i = 0; i < row; i++){                                 // Matris oluşturma bloğu.
@@ -92,7 +92,7 @@ void randomize_empty_slots(char **matrix, int row, int column, int *change){
         for(i = 0; i < row; i++){
             for(j = 0; j < column; j++){
                 if(matrix[i][j] == ' '){
-                    matrix[i][j] = rand()%10 + '0';
+                    matrix[i][j] = rand()%10  + '0';
                     *change = 1;
                     printf("\033[1;31m%c \033[0m", matrix[i][j]);       // Yeni eklenenleri renkli yaz,
                 }
@@ -127,7 +127,7 @@ void check_neighbors(char **matrix, int i, int j, int reference, int i_max, int 
         }
     }
     if(i > 0){
-        if(matrix[i][j] == matrix[i - 1][j] && reference != 2){
+        if(matrix[i][j] == matrix[i - 1][j] && reference != 2 && reference != 3){
             check_neighbors(matrix, i - 1, j, 4, i_max, j_max, change, score);
             has_neighbor = 1;
         }
