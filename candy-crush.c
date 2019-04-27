@@ -12,6 +12,10 @@ void swap(char *char1, char *char2);
 void print_dashes(int column);
 int will_continue(char **matrix, int row, int column);
 
+char symbols[10][7] = {"\u25CF", "\u25B2", "x",
+                       "\u25C6", "\u2665", "O",
+                       "\u25A0", "\u2660", "\u03A6"};
+
 // Genel bilgi:
 // change değişkenini bazı işlemleri programın bazı işlemleri yapıp yapmayacağına karar
 // vermek için koydum, bir fonksiyon matrisi değiştiren bir işlem yaptığında change 
@@ -21,27 +25,26 @@ int will_continue(char **matrix, int row, int column);
 
 
 void main(){
-    int i, j, row, column, change, *score = (int *) malloc(sizeof(int)); *score = 0;
+    int i, row, column, change, *score = (int *) malloc(sizeof(int)); *score = 0;
     char **matrix;
-    srand(time(NULL));  //system("COLOR FC"); 
+    srand(time(NULL));  //system("COLOR FC");
     printf("Oyun alaninin satir ve sutun sayisini veriniz:  "); scanf("%d %d", &row, &column); getchar();
     matrix = (char **) malloc(row * sizeof(char *));         ///
     for(i = 0; i < row; i++){                                 // Matris oluşturma bloğu.
         matrix[i] = (char *) malloc(column * sizeof(char));   //
     }                                                        ///
-
-    randomize_game_table(matrix, row, column);    // Tüm elemanlara 0-9 arası rastgele değer veriyor.
+    randomize_game_table(matrix, row, column);    // Tüm elemanlara 0-8 arası rastgele değer veriyor.
     print_game_table(matrix, row, column);
     do{
         do{
             do{
-                matrisi_dolas(matrix, row, column, &change, score); // Matris elemanlarını dolaşıp aynı olanları patlatıyor.
+              matrisi_dolas(matrix, row, column, &change, score); // Matris elemanlarını dolaşıp aynı olanları patlatıyor.
                 if(change){  // Eğer değişim(patlayan eleman) varsa;
                     getchar();
                     print_game_table(matrix, row, column);
                     gravity(matrix, row, column, &change);  // Havada kalanları aşağı indiriyor.
                     if(change){  // Aşağı inen eleman yoksa aynı matrisi tekrar yazdırmamak için if koydum.
-                        getchar();                                     
+                        getchar();
                         print_game_table(matrix, row, column);
                     }
                 }
@@ -63,7 +66,7 @@ void print_game_table(char **matrix, int row, int column){
     print_dashes(column);   // Bu fonksiyon sadece görsellik için. Ekrana matrisleri ayıran çizgiyi basıyor.
     for(i = 0; i < row; i++){
         for(j = 0; j < column; j++){            // Matrisi ekrana yazıyor.
-            printf("%c ", matrix[i][j]);
+          printf("%s ", (matrix[i][j] != ' ') ? symbols[(int)matrix[i][j] - '0'] : " ");
         }
         printf("\n");
     }
@@ -73,7 +76,7 @@ void randomize_game_table(char **matrix, int row, int column){
     int i, j;
     for(i = 0; i < row; i++){
         for(j = 0; j < column; j++){
-            matrix[i][j] = rand()%10 + '0';        // Matrisin ilklendirmesini yapıyor.
+            matrix[i][j] = rand()%9 + '0';        // Matrisin ilklendirmesini yapıyor.
         }
     }
 }
@@ -81,7 +84,7 @@ void randomize_game_table(char **matrix, int row, int column){
 void randomize_empty_slots(char **matrix, int row, int column, int *change){
     int i, j;
     for(i = 0; i < row; i++){
-        for(j = 0; j < column; j++){     
+        for(j = 0; j < column; j++){
             if(matrix[i][j] == ' '){
                 *change = 1;            // Boş yer yoksa gereksiz yere ekrana matrisi yazdırmamak için.
             }
@@ -92,12 +95,13 @@ void randomize_empty_slots(char **matrix, int row, int column, int *change){
         for(i = 0; i < row; i++){
             for(j = 0; j < column; j++){
                 if(matrix[i][j] == ' '){
-                    matrix[i][j] = rand()%10  + '0';
+                    matrix[i][j] = rand()%9  + '0';
                     *change = 1;
-                    printf("\033[1;31m%c \033[0m", matrix[i][j]);       // Yeni eklenenleri renkli yaz,
+                    printf("\033[1;31m%s \033[0m", // Yeni eklenenleri renkli yaz,
+                           (matrix[i][j] != ' ') ? symbols[(int)matrix[i][j] - '0'] : " ");
                 }
                 else{
-                    printf("%c ", matrix[i][j]);                        // eskileri normal.
+                    printf("%s ", symbols[(int)matrix[i][j] - '0']);                        // eskileri normal.
                 }
             }
             printf("\n");
@@ -116,7 +120,7 @@ void check_neighbors(char **matrix, int i, int j, int reference, int i_max, int 
     }
     if(j > 0){
         if(matrix[i][j] == matrix[i][j - 1] && reference != 1){
-            check_neighbors(matrix, i, j - 1, 3, i_max, j_max, change, score);   
+          check_neighbors(matrix, i, j - 1, 3, i_max, j_max, change, score);
             has_neighbor = 1;
         }
     }
@@ -133,7 +137,7 @@ void check_neighbors(char **matrix, int i, int j, int reference, int i_max, int 
         }
     }
     if(reference != 0 || has_neighbor){
-        matrix[i][j] = ' ';                 // Aynı olan komşusu varsa kendisini patlatıyor.
+        matrix[i][j] = ' ';                   // Aynı olan komşusu varsa kendisini patlatıyor.
         (*score)++;                         // Reference kısmı ilk kontrol edilen elemanın komşusu olmamasına rağmen patlamaması için.
         *change = 1;
     }
@@ -155,13 +159,13 @@ void gravity(char **matrix, int row, int column, int *change){
     int i, j, k;
     *change = 0;
     for(j = 0; j < column; j++){
-        for(i = row - 1; i >= 0; i--){    
+        for(i = row - 1; i >= 0; i--){
             if(matrix[i][j] == ' '){            // Eğer boşluğa denk gelirsen,
                 for(k = i - 1; k >= 0; k--){    // yukarı doğru ilerke, 
                     if(matrix[k][j] != ' '){    // sayıya denk gelince, 
                         swap(&matrix[i][j], &matrix[k][j]);   // swap yap.
                         *change = 1;
-                        break;                     
+                        break;
                     }
                 }
             }
@@ -189,29 +193,29 @@ int will_continue(char **matrix, int row, int column){
         }
     } while(!devam);
     if(devam == 'E' || devam == 'e'){
-        printf("Yer degistirilecek elemanlarin indislerini veriniz: "); scanf("%d,%d %d,%d", &i1, &j1, &i2, &j2);
+        printf("Yer degistirilecek elemanlarin indislerini veriniz: ");
+        scanf("%d,%d %d,%d", &i1, &j1, &i2, &j2);
+        i1--; i2--; j1--; j2--;
         printf("\n");
         print_dashes(column);
 
         for(i = 0; i < row; i++){
             for(j = 0; j < column; j++){
                 if((i == i1 && j == j1) || (i == i2 && j == j2)){
-                    printf("\033[1;32m%c \033[0m", matrix[i][j]);
+                    printf("\033[1;32m%s \033[0m", (matrix[i][j] != ' ') ? symbols[(int)matrix[i][j] - '0'] : " ");
                 }
                 else{
-                    printf("%c ", matrix[i][j]);
+                  printf("%s ", (matrix[i][j] != ' ') ? symbols[(int)matrix[i][j] - '0'] : " ");
                 }
             }
             printf("\n");
         }
-        
         swap(&matrix[i1][j1], &matrix[i2][j2]);
         getchar(); getchar();
         print_game_table(matrix, row, column);
     }
     return (devam == 'E') || (devam == 'e') ? 1 : 0; // Mainde bu fonksiyonu while içine koymuştum. Devam edecekse true dönüyor.
 }
-
 
 void print_dashes(int column){      // Bu fonksiyon görsellik için, ekrana düz çizgi basıyor.
     int i;
